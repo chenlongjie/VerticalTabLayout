@@ -9,12 +9,14 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.PopupMenu;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.zlx.verticaltablayout.VerticalTabLayout;
 import com.zlx.verticaltablayout.adapter.TabAdapter;
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         viewpager = (ViewPager) findViewById(R.id.viewpager);
         viewpager.setAdapter(new MyPagerAdapter());
 
-        /*initTab0();
+     /*   initTab0();
         initTab1();
         initTab2();
         initTab3();*/
@@ -56,9 +58,12 @@ public class MainActivity extends AppCompatActivity {
                 .setOnDragStateChangedListener(new Badge.OnDragStateChangedListener() {
                     @Override
                     public void onDragStateChanged(int dragState, Badge badge, View targetView) {
-                        final android.widget.PopupMenu popupMenu = new android.widget.PopupMenu(MainActivity.this, (View)qTabView.getBadgeView(), GravityCompat.END);
-                        popupMenu.inflate(com.zlx.verticaltablayout.R.menu.group_pop);
-                        popupMenu.show();
+                        if(dragState==STATE_DOWNACTION){
+                            Log.d(this.getClass().getName(),"+++++++++++STATE_DOWNACTION++++++++++++=="+dragState);
+                            /*final android.widget.PopupMenu popupMenu = new android.widget.PopupMenu(MainActivity.this, (View)qTabView.getBadgeView(), GravityCompat.END);
+                            popupMenu.inflate(com.zlx.verticaltablayout.R.menu.group_pop);
+                            popupMenu.show();*/
+                        }
                     }
                 }).build();
         qTabView.setBadge(tabBadge)

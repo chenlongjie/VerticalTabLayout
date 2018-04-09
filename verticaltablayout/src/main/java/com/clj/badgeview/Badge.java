@@ -77,6 +77,7 @@ public interface Badge {
         int STATE_DRAGGING_OUT_OF_RANGE = 3;
         int STATE_CANCELED = 4;
         int STATE_SUCCEED = 5;
+        int STATE_DOWNACTION = 6;
 
         void onDragStateChanged(int dragState, Badge badge, View targetView);
     }

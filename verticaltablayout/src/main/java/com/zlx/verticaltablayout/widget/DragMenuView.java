@@ -1,4 +1,5 @@
 package com.zlx.verticaltablayout.widget;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -6,21 +7,15 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.Px;
 import android.support.annotation.RequiresApi;
-import android.support.v4.view.GravityCompat;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.clj.badgeview.Badge;
 import com.clj.badgeview.DisplayUtil;
-import com.zlx.verticaltablayout.R;
 
-/**
- * Created by zlx on 2017/7/10.
- */
-public class QTabView  extends TabView{
+public class DragMenuView extends TabView  {
     private Context mContext;
     private TextView mTitle;
     private Badge mBadgeView;
@@ -29,7 +24,7 @@ public class QTabView  extends TabView{
     private TabBadge mTabBadge;
     private boolean mChecked;
     private Drawable mDefaultBackground;
-    public QTabView(Context context) {
+    public DragMenuView(Context context) {
         super(context);
         mContext = context;
         mTabIcon = new TabIcon.Builder().build();
@@ -50,15 +45,6 @@ public class QTabView  extends TabView{
 
     private void initView() {
         setMinimumHeight(DisplayUtil.dp2px(mContext,25));
-        if (mTitle == null) {
-            mTitle = new TextView(mContext);
-            LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-            params.gravity = Gravity.CENTER;
-            mTitle.setLayoutParams(params);
-            this.addView(mTitle);
-        }
-        initTitleView();
-        initIconView();
         initBadge();
     }
 
@@ -163,7 +149,7 @@ public class QTabView  extends TabView{
     }
 
     @Override
-    public QTabView setBadge(TabBadge badge) {
+    public DragMenuView setBadge(TabBadge badge) {
         if (badge != null) {
             mTabBadge = badge;
         }
@@ -172,7 +158,7 @@ public class QTabView  extends TabView{
     }
 
     @Override
-    public QTabView setIcon(TabIcon icon) {
+    public DragMenuView setIcon(TabIcon icon) {
         if (icon != null) {
             mTabIcon = icon;
         }
@@ -181,7 +167,7 @@ public class QTabView  extends TabView{
     }
 
     @Override
-    public QTabView setTitle(TabTitle title) {
+    public DragMenuView setTitle(TabTitle title) {
         if (title != null) {
             mTabTitle = title;
         }
@@ -194,7 +180,7 @@ public class QTabView  extends TabView{
      *              background
      */
     @Override
-    public QTabView setBackground(int resId) {
+    public DragMenuView setBackground(int resId) {
         if (resId == 0) {
             setDefaultBackground();
         } else if (resId <= 0) {

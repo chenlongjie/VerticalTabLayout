@@ -44,6 +44,7 @@ public class QBadgeView extends View implements Badge {
     protected boolean mDraggable;
     protected boolean mDragging;
     protected boolean mFirstDragg;
+    protected boolean isClick;
     protected boolean mExact;
     protected boolean mShowShadow;
     protected int mBadgeGravity;
@@ -82,8 +83,6 @@ public class QBadgeView extends View implements Badge {
     protected OnDragStateChangedListener mDragStateChangedListener;
 
     protected ViewGroup mActivityRoot;
-    private long curClickTime;
-    ;
 
     public QBadgeView(Context context) {
         this(context, null);
@@ -205,9 +204,10 @@ public class QBadgeView extends View implements Badge {
                         && mBadgeText != null) {
                     initRowBadgeCenter();
                     updataListener(OnDragStateChangedListener.STATE_START);
-//                    mDefalutRadius = DisplayUtil.dp2px(getContext(), 7);
+                    mDefalutRadius = DisplayUtil.dp2px(getContext(), 5);
                     getParent().requestDisallowInterceptTouchEvent(true);
                     mDragging = true;
+                    isClick=true;
                     screenFromWindow(true);
                    /*     mDragCenter.x = event.getRawX();
                     mDragCenter.y = event.getRawY();*/
@@ -215,7 +215,8 @@ public class QBadgeView extends View implements Badge {
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mDragging) {
-                    mFirstDragg=true;
+                    mFirstDragg = true;
+                    isClick=false;
                     mDragCenter.x = event.getRawX();
                     mDragCenter.y = event.getRawY();
                     invalidate();
@@ -225,8 +226,13 @@ public class QBadgeView extends View implements Badge {
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_CANCEL:
                 if (event.getPointerId(event.getActionIndex()) == 0 && mDragging) {
+                    if(isClick){
+                        updataListener(OnDragStateChangedListener.STATE_DOWNACTION);
+                    }else {
+                        onPointerUp();
+                    }
+                    isClick=false;
                     mDragging = false;
-                    onPointerUp();
                 }
                 break;
         }
@@ -237,8 +243,9 @@ public class QBadgeView extends View implements Badge {
         if (mDragOutOfRange) {
 //            animateHide(mDragCenter);
             updataListener(OnDragStateChangedListener.STATE_SUCCEED);
-        } else {
             reset();
+        } else {
+//            reset();
             updataListener(OnDragStateChangedListener.STATE_CANCELED);
         }
     }
@@ -306,9 +313,9 @@ public class QBadgeView extends View implements Badge {
             float badgeRadius = getBadgeCircleRadius();
             float startCircleRadius = mDefalutRadius * (1 - MathUtil.getPointDistance
                     (mRowBadgeCenter, mDragCenter) / mFinalDragDistance);
-            if (mDraggable && mDragging&&mFirstDragg) {
-               /* mDragQuadrant = MathUtil.getQuadrant(mDragCenter, mRowBadgeCenter);
-                showShadowImpl(mShowShadow);*/
+            if (mDraggable && mDragging && mFirstDragg) {
+                mDragQuadrant = MathUtil.getQuadrant(mDragCenter, mRowBadgeCenter);
+                showShadowImpl(mShowShadow);
                 if (mDragOutOfRange = startCircleRadius < DisplayUtil.dp2px(getContext(), 1.5f)) {
                     updataListener(OnDragStateChangedListener.STATE_DRAGGING_OUT_OF_RANGE);
                     drawBadge(canvas, mDragCenter, badgeRadius);
@@ -318,8 +325,10 @@ public class QBadgeView extends View implements Badge {
                     drawBadge(canvas, mDragCenter, badgeRadius);
                 }
             } else {
+                if(mBadgeGravity!=Gravity.START){
+                    findBadgeCenter();
+                }
                 mDragCenter = mBadgeCenter;
-                findBadgeCenter();
                 drawBadge(canvas, mBadgeCenter, badgeRadius);
             }
         }
@@ -583,10 +592,20 @@ public class QBadgeView extends View implements Badge {
     }
 
     public void reset() {
-        mDragCenter.x = -1000;
-        mDragCenter.y = -1000;
+//        mDragCenter.x = 0;
+//        mDragCenter.y = -1000;
         mDragQuadrant = 4;
-        screenFromWindow(false);
+//        screenFromWindow(false);
+        float rectWidth = mBadgeTextRect.height() > mBadgeTextRect.width() ?
+                mBadgeTextRect.height() : mBadgeTextRect.width();
+        mBadgeCenter.y=mDragCenter.y;
+        if(mDragCenter.x<mWidth / 2f){
+            mBadgeGravity=Gravity.START;
+            mBadgeCenter.x  = mGravityOffsetX + mBadgePadding + rectWidth / 2f;
+        }else {
+            mBadgeGravity=Gravity.END;
+            mBadgeCenter.x  =mWidth - (mGravityOffsetX + mBadgePadding + rectWidth / 2f);;
+        }
         getParent().requestDisallowInterceptTouchEvent(false);
         invalidate();
     }
