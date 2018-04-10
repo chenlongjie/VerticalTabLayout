@@ -204,7 +204,7 @@ public class QBadgeView extends View implements Badge {
                         && mBadgeText != null) {
                     initRowBadgeCenter();
                     updataListener(OnDragStateChangedListener.STATE_START);
-                    mDefalutRadius = DisplayUtil.dp2px(getContext(), 5);
+                    mDefalutRadius = DisplayUtil.dp2px(getContext(), 1);
                     getParent().requestDisallowInterceptTouchEvent(true);
                     mDragging = true;
                     isClick=true;
@@ -843,7 +843,7 @@ public class QBadgeView extends View implements Badge {
 
     @Override
     public PointF getDragCenter() {
-        if (mDraggable && mDragging) return mDragCenter;
+        if (mDraggable/* && mDragging*/) return mDragCenter;
         return null;
     }
 

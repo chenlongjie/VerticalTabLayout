@@ -1,17 +1,22 @@
 package com.zlx.verticaltablayout.widget;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.Px;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.GravityCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.clj.badgeview.Badge;
 import com.clj.badgeview.DisplayUtil;
@@ -20,7 +25,7 @@ import com.zlx.verticaltablayout.R;
 /**
  * Created by zlx on 2017/7/10.
  */
-public class QTabView  extends TabView{
+public class QTabView extends TabView {
     private Context mContext;
     private TextView mTitle;
     private Badge mBadgeView;
@@ -28,7 +33,10 @@ public class QTabView  extends TabView{
     private TabTitle mTabTitle;
     private TabBadge mTabBadge;
     private boolean mChecked;
+    private boolean mVisiable;
     private Drawable mDefaultBackground;
+    private int mWidth;
+
     public QTabView(Context context) {
         super(context);
         mContext = context;
@@ -49,16 +57,10 @@ public class QTabView  extends TabView{
     }
 
     private void initView() {
-        setMinimumHeight(DisplayUtil.dp2px(mContext,25));
-        if (mTitle == null) {
-            mTitle = new TextView(mContext);
-            LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-            params.gravity = Gravity.CENTER;
-            mTitle.setLayoutParams(params);
-            this.addView(mTitle);
-        }
-        initTitleView();
-        initIconView();
+        setMinimumHeight(DisplayUtil.dp2px(mContext, 25));
+
+//        initTitleView();
+//        initIconView();
         initBadge();
     }
 
@@ -73,8 +75,41 @@ public class QTabView  extends TabView{
         mTitle.setPadding(left, top, right, bottom);
     }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mWidth = w;
+    }
+
     private void initBadge() {
         mBadgeView = TabBadgeView.bindTab(this);
+        mBadgeView.setOnDragStateChangedListener(new Badge.OnDragStateChangedListener() {
+            @Override
+            public void onDragStateChanged(int dragState, Badge badge, View targetView) {
+                switch (dragState) {
+                    case STATE_DOWNACTION:
+                        if (mVisiable) {
+                            mTitle.setVisibility(GONE);
+                            mVisiable = false;
+                        } else {
+                            mVisiable = true;
+                            PointF pointF = badge.getDragCenter();
+                            int gravity = badge.getBadgeGravity();
+                            initTitleView(pointF, gravity);
+                        }
+                        break;
+                    case STATE_DRAGGING:
+                    case STATE_SUCCEED:
+                        if (mTitle != null) {
+                            mVisiable = false;
+                            mTitle.setVisibility(GONE);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
         if (mTabBadge.getBackgroundColor() != 0xFFE84E40) {
             mBadgeView.setBadgeBackgroundColor(mTabBadge.getBackgroundColor());
         }
@@ -115,14 +150,35 @@ public class QTabView  extends TabView{
             mBadgeView.setOnDragStateChangedListener(mTabBadge.getOnDragStateChangedListener());
         }
     }
-    private void initTitleView() {
+
+    private void initTitleView(PointF pointF, int mBadgeGravity) {
+        if (mTitle == null) {
+            mTitle = new TextView(mContext);
+            this.addView(mTitle);
+        }
         mTitle.setTextColor(isChecked() ? mTabTitle.getColorSelected() : mTabTitle.getColorNormal());
         mTitle.setTextSize(mTabTitle.getTitleTextSize());
         mTitle.setText(mTabTitle.getContent());
-        mTitle.setGravity(Gravity.CENTER);
         mTitle.setEllipsize(TextUtils.TruncateAt.END);
+        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        switch (mBadgeGravity) {
+            case Gravity.END:
+                int gX = (int) pointF.x;
+                int marginX = mWidth - gX;
+                mTitle.setGravity(Gravity.END);
+                params.setMargins(0, (int) pointF.y, marginX + DisplayUtil.dp2px(getContext(), 25f), 0);
+                break;
+            case Gravity.START:
+            case Gravity.CENTER | Gravity.START:
+                mTitle.setGravity(Gravity.START);
+                params.setMargins((int) pointF.x + DisplayUtil.dp2px(getContext(), 25f), (int) pointF.y, 0, 0);
+                break;
+        }
+        mTitle.setLayoutParams(params);
+        mTitle.setVisibility(VISIBLE);
         refreshDrawablePadding();
     }
+
     private void initIconView() {
         int iconResid = mChecked ? mTabIcon.getSelectedIcon() : mTabIcon.getNormalIcon();
         Drawable drawable = null;
@@ -185,7 +241,7 @@ public class QTabView  extends TabView{
         if (title != null) {
             mTabTitle = title;
         }
-        initTitleView();
+//        initTitleView();
         return this;
     }
 

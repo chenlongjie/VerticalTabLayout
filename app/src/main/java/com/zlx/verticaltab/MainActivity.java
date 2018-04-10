@@ -3,6 +3,7 @@ package com.zlx.verticaltab;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -14,10 +15,9 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.clj.badgeview.QBadgeView;
 import com.zlx.verticaltablayout.VerticalTabLayout;
 import com.zlx.verticaltablayout.adapter.TabAdapter;
 import com.zlx.verticaltablayout.widget.ITabView;
@@ -33,7 +33,20 @@ import com.clj.badgeview.Badge;
 
 public class MainActivity extends AppCompatActivity {
     private ViewPager viewpager;
-
+    private QTabView qTabView;
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(android.os.Message msg) {
+            switch (msg.what) {
+                case 1:
+                    final android.widget.PopupMenu popupMenu = new android.widget.PopupMenu(MainActivity.this, (getWindow().getDecorView().findViewById(android.R.id.content)), GravityCompat.START);
+                    popupMenu.inflate(com.zlx.verticaltablayout.R.menu.group_pop);
+                    popupMenu.show();
+                    break;
+            }
+            super.handleMessage(msg);
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,23 +65,17 @@ public class MainActivity extends AppCompatActivity {
     }
     private void initFloating(){
         final Drawable drawable = getResources().getDrawable(R.drawable.floatbtn);
-        final QTabView qTabView= new QTabView(this);
+       qTabView= new QTabView(this);
         ITabView.TabBadge tabBadge=new TabView.TabBadge.Builder().setBadgeNumber(1).setDrawableBackground(drawable,false)
                 .setBadgeTextColor(Color.RED)
-                .setOnDragStateChangedListener(new Badge.OnDragStateChangedListener() {
-                    @Override
-                    public void onDragStateChanged(int dragState, Badge badge, View targetView) {
-                        if(dragState==STATE_DOWNACTION){
-                            Log.d(this.getClass().getName(),"+++++++++++STATE_DOWNACTION++++++++++++=="+dragState);
-                            /*final android.widget.PopupMenu popupMenu = new android.widget.PopupMenu(MainActivity.this, (View)qTabView.getBadgeView(), GravityCompat.END);
-                            popupMenu.inflate(com.zlx.verticaltablayout.R.menu.group_pop);
-                            popupMenu.show();*/
-                        }
-                    }
-                }).build();
-        qTabView.setBadge(tabBadge)
+                .build();
+        ITabView.TabTitle tabTitle=new TabView.TabTitle.Builder()
+                .setContent("dsadsadsadsa")
+                .setTextColor(0xFF36BC9B, Color.BLACK)
+                .build();
+        qTabView.setBadge(tabBadge).setTitle(tabTitle)
                 .setBackground(0xff2faae5);
-        ViewGroup view= (ViewGroup) (getWindow().getDecorView().findViewById(android.R.id.content));
+        ViewGroup view= (ViewGroup) (getWindow().getDecorView().getRootView());
         view.addView(qTabView);
 
 
